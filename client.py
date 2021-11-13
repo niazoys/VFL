@@ -2,8 +2,7 @@ from LR import model
 from client_interface import ClientInterface
 
 class Guest(ClientInterface):
-    def __init__(self,model:model,data=None,mode='host'):
-        self.mode = mode
+    def __init__(self,model:model,data=None):
         self.data = data
         self.model = model
 
