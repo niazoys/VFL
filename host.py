@@ -3,11 +3,15 @@ from LR import model
 from client_interface import ClientInterface
 
 class Host(ClientInterface):
-    def __init__(self,model:model):
-        #self.x = data
+    def __init__(self,model:model,data):
+        self.x = data
         self.model = model
 
-    def forward(self,x):
+    def create_batch(self,ids):
+        return np.array([self.x[id] for id in ids])
+
+    def forward(self,ids):
+        x=self.create_batch(ids)
         self.z = self.model.forward(x)
 
     def receive(self,grad):
