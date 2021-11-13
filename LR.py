@@ -1,11 +1,17 @@
-from sklearn.datasets import make_classification
+from typing import overload
 import numpy as np
-X, y = make_classification(n_samples=10000, n_features=20, n_redundant=0, 
-                           n_informative=2, random_state=1, 
-                           n_clusters_per_class=1)
 
 
 class model:
+
+    def __init__(self,data,lr=0.01):
+        x,y=data
+        self.m,self.n=x.shape
+        self.w=np.zeros((self.n,1))
+        self.b=0
+        self.lr=lr
+        self.dw=None
+        self.db=None
 
     def normalize(self,X):
         m, n = X.shape
@@ -22,48 +28,53 @@ class model:
         return loss
     
     def gradients(self,X, y, y_hat):
-        m = X.shape[0]
         # Gradient of loss w.r.t weights.
-        dw = (1/m)*np.dot(X.T, (y_hat - y))
+        dw = (1/self.m)*np.dot(X.T, (y_hat - y))
         # Gradient of loss w.r.t bias.
-        db = (1/m)*np.sum((y_hat - y)) 
+        db = (1/self.m)*np.sum((y_hat - y)) 
         return dw, db
     
-    def forward(self, x, y):
-        m, n = X.shape
-        w = np.zeros((n,1))
-        b = 0
-        y = y.reshape(m,1)
-        x = self.normalize(x)
-        z = (np.dot(x, w) + b)
+    def forward(self, x):
+        self.x = self.normalize(x)
+        z = (np.dot(self.x, self.w) + self.b)
         return z
     
-    def update_model(self,x,y,z,lr):
-        losses = []
+    def compute_gradient(self,z,y):
+        y = y.reshape(self.m,1)
         y_hat=self.sigmoid(z)
-
-        self.dw, self.db = self.gradients(x, y, y_hat)
-
+        self.dw, self.db = self.gradients(self.x, y, y_hat)
+        return self.dw,self.db
+    @overload      
+    def update_model(self,dw,db,y):
+        self.dw=dw
+        self.db=db
         # Updating the parameters.
-        w -= lr*self.dw
-        b -= lr*self.db
+        self.w -= self.lr*self.dw
+        self.b -= self.lr*self.db
+        l = self.loss(y, self.sigmoid(np.dot(self.x, self.w) + self.b))
+        return l
+    
+    @overload      
+    def update_model(self,dw,db):
+        self.dw=dw
+        self.db=db
+        # Updating the parameters.
+        self.w -= self.lr*self.dw
+        self.b -= self.lr*self.db
+        
+    
 
-        l = self.loss(y, self.sigmoid(np.dot(x, w) + b))
-        losses.append(l)
-        return self.dw,self.db,losses
 
     def get_gradients(self):
-        return self.dw, self.db
+        if (self.dw and self.db) is not None:
+            return self.dw, self.db
+        else:
+            return None
 
     def predict(self, X):
-
         x = self.normalize(X)
-
-        preds = self.sigmoid(np.dot(x, w) + b)
-
+        preds = self.sigmoid(np.dot(x, self.w) + self.b)
         pred_class = []
-        # if y_hat >= 0.5 --> round up to 1
-        # if y_hat < 0.5 --> round up to 1
         pred_class = [1 if i > 0.5 else 0 for i in preds]
         return np.array(pred_class)
 
