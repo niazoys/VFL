@@ -44,6 +44,7 @@ class model:
         y_hat=self.sigmoid(z)
         self.dw, self.db = self.gradients(self.x, y, y_hat)
         return self.dw,self.db
+  
     @overload      
     def update_model(self,dw,db,y):
         self.dw=dw

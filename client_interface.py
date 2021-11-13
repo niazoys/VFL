@@ -1,8 +1,13 @@
-class ClientInterface:
-    def receive(self,data):
-        pass
+from abc import ABC, abstractmethod
+
+class ClientInterface(ABC):
+    @abstractmethod
+    def receive(self, data):
+        ...
+    @abstractmethod
     def send(self):
-        pass
+        ...
+    @abstractmethod
     def compute_gradient(self):
-        pass
+        ...
     
