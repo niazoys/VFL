@@ -23,9 +23,8 @@ y=vs.get_labels()
 guest = Guest(model,data=(x1,y))
 host1 = Host(model,data=x2)
 host2 = Host(model,data=x3)
+
 seen_sample=[]
-
-
 def generate_batch_ids(limit=1000,n_samples=200,batch_size=bs):
     ids=[]
     counter=0
@@ -42,5 +41,13 @@ def generate_batch_ids(limit=1000,n_samples=200,batch_size=bs):
 for r in range(comm_round):
     for batch in range(num_batch+1):
         ids=generate_batch_ids()
+
+        # Compute the output Z_b for all participants
+        guestProcess=Process(target=guest.forward,args=ids)
+        host1Process=Process(target=host1.forward,args=ids)
+        host2Process=Process(target=host2.forward,args=ids)
+
+        
+        
 
 
