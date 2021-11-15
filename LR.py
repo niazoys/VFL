@@ -1,13 +1,16 @@
 from typing import overload
 import numpy as np
+from multipledispatch import dispatch
+import scipy as sp 
+sp.random.seed(12345) 
 
 
 class model:
 
     def __init__(self,data,lr=0.01):
-        x,y=data
+        x=data
         self.m,self.n=x.shape
-        self.w=np.zeros((self.n,1))
+        self.w=sp.random.normal(loc=0.0, scale=1.0, size=(self.n,1))
         self.b=0
         self.lr=lr
         self.dw=None
@@ -34,19 +37,18 @@ class model:
         db = (1/self.m)*np.sum((y_hat - y)) 
         return dw, db
     
-    def forward(self, x):
+    def forward(self,x):
         self.x = self.normalize(x)
         z = (np.dot(self.x, self.w) + self.b)
         return z
     
     def compute_gradient(self,z,y):
-        y = y.reshape(self.m,1)
         y_hat=self.sigmoid(z)
         self.dw, self.db = self.gradients(self.x, y, y_hat)
         return self.dw,self.db
   
-    @overload      
-    def update_model(self,dw,db,y):
+        
+    def update_model_(self,dw,db,y):
         self.dw=dw
         self.db=db
         # Updating the parameters.
@@ -54,8 +56,6 @@ class model:
         self.b -= self.lr*self.db
         l = self.loss(y, self.sigmoid(np.dot(self.x, self.w) + self.b))
         return l
-    
-    @overload      
     def update_model(self,dw,db):
         self.dw=dw
         self.db=db

@@ -5,9 +5,12 @@ from client_interface import ClientInterface
 class Guest(ClientInterface):
     def __init__(self,model:model,data):
         self.x,self.y = data
-        self.model = model
+        self.model = model(self.x)
+        self.z = None
     
     def create_batch(self,ids):
+        self.y_=np.array([self.y[id] for id in ids])
+        self.y_=self.y_.reshape(len(self.y_),1)
         return np.array([self.x[id] for id in ids])
 
     def forward(self,ids):
@@ -15,15 +18,18 @@ class Guest(ClientInterface):
         self.z = self.model.forward(x)
 
     def receive(self,_z):
-        self.z = np.mean(_z,self.z)
+        self.z = (_z + self.z) / 2
+        #self.z = np.mean(_z,self.z)
     
     def compute_gradient(self):
-        self.dw,self.db = self.model.compute_gradient(self.z,self.y)
+        self.dw,self.db = self.model.compute_gradient(self.z,self.y_)
     
     def send(self):
         return self.dw,self.db
     
     def update_model(self):
-        self.loss = self.model.update_model(self.dw,self.db,self.y)
+        self.loss = self.model.update_model_(self.dw,self.db,self.y_)
+
+    
 
     

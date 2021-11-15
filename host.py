@@ -1,13 +1,15 @@
-import numpy
+import numpy as np
 from LR import model
 from client_interface import ClientInterface
 
 class Host(ClientInterface):
     def __init__(self,model:model,data):
         self.x = data
-        self.model = model
+        self.model = model(self.x)
+        self.z= None
 
     def create_batch(self,ids):
+
         return np.array([self.x[id] for id in ids])
 
     def forward(self,ids):
@@ -22,5 +24,8 @@ class Host(ClientInterface):
     
     def update_model(self):
         self.loss = self.model.update_model(self.dw,self.db)
+
+    def compute_gradient(self):
+        return 0
 
     
